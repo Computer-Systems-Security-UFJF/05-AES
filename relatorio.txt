@@ -1,0 +1,43 @@
+Alunos:
+Luca Rodrigues Pazna - 202465173AC
+Caio César Ferreira Louback - 202335032
+
+--- Parágrafo Técnico ---
+
+Confusão é a propriedade que torna a relação entre a chave e o ciphertext
+complexa e não-linear, dificultando que um atacante deduza a chave a partir
+do texto cifrado. No AES, a confusão é realizada pelo SubBytes, que aplica
+a S-box (uma substituição não-linear) a cada byte do estado. Difusão é a
+propriedade que garante que cada bit do texto claro influencie muitos bits
+do ciphertext, de modo que qualquer diferença local se espalhe rapidamente
+por todo o bloco. No AES, a difusão é promovida pela combinação de
+ShiftRows (permutação de bytes entre colunas) e MixColumns (combinação
+linear dos bytes de cada coluna usando aritmética em GF(2^8)). Os
+experimentos realizados confirmam isso empiricamente: com MixColumns ativo,
+a avalanche parte de ~3% na 1ª rodada, cresce para ~12% na 2ª e já atinge
+~50% na 3ª rodada (dados medidos: 1 rodada = 3,1%, 2 rodadas = 12,6%,
+3 rodadas = 50,2%), saturando em torno de 64/128 bits para todas as rodadas
+seguintes. Sem MixColumns, a diferença de 1 bit permanece confinada a ~4
+bits (≈ 3,1%) independentemente do número de rodadas (medido para 2, 4, 6
+e 10 rodadas), provando que SubBytes e ShiftRows sozinhos não produzem
+difusão suficiente: o MixColumns é indispensável para que a cifra alcance
+o efeito avalanche.
+
+--- Parágrafo Crítico ---
+
+O AES-128 utiliza 10 rodadas, mas os experimentos mostram que a avalanche
+satura já na 3ª rodada. Essa diferença de 7 rodadas não é desperdício: é
+margem de segurança deliberada. Na criptoanálise, ataques a versões de
+rodadas reduzidas do AES-128 são conhecidos, por exemplo, existem ataques
+biclique e diferenciais-truncados publicados contra variantes com até ~7
+rodadas, que reduzem (ainda que marginalmente) a complexidade em relação à
+busca exaustiva. No entanto, o AES completo de 10 rodadas permanece sem
+ataque prático: nenhum método publicado quebra o AES-128 com custo
+computacional viável. Esse é um princípio fundamental de engenharia de
+segurança: uma cifra não deve ser projetada para ser "exatamente segura",
+mas sim para ter folga suficiente para sobreviver a avanços futuros na
+criptoanálise. A margem de rodadas funciona como reserva de segurança 
+mesmo que um ataque a 8 ou 9 rodadas seja descoberto amanhã, o AES de 10
+rodadas continuaria seguro. Projetar sem margem seria apostar que nenhum
+progresso analítico ocorrerá durante toda a vida útil do sistema, uma
+aposta imprudente para qualquer padrão criptográfico de longa duração.
